@@ -1,16 +1,39 @@
-# This is a sample Python script.
+from fastapi import FastAPI
+from schemas import User, Order
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+app = FastAPI()
+
+user_list = []
+order_list = []
+
+@app.get("/")
+async def root():
+    return {"message": "Приветствую, Дмитрий"}
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+@app.post('/user')
+async def create_user(user: User):
+    user_list.append(user.dict())
+    return {"user": user.dict()}
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+@app.post('/order')
+async def create_order(order: Order):
+    order_list.append(order.dict())
+    return {"order": order.dict()}
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+@app.get('/users')
+async def get_users():
+    return {"user": user_list}
+
+@app.get('/order')
+async def get_orders():
+    return {"order": order_list}
+
+@app.get('/user')
+async def get_user(username: str):
+    for user in user_list:
+        if user['username'] == username:
+            return {"user": user}
+    return {'error': 'User not found'}
