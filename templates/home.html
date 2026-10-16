@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeatMap</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+</head>
+<body>
+    <header class="container text-center my-4">
+        <h1>HeatMap</h1>
+        <nav class="nav justify-content-center">
+            <a class="nav-link" href="{{ url_for('root') }}">Главная</a>
+            <a class="nav-link" href="{{ url_for('get_users') }}">Пользователи</a>
+            <a class="nav-link" href="{{ url_for('get_orders') }}">Заказы</a>
+        </nav>
+    </header>
+    <main class="container">
+        <hr>
+        {% block content %}
+        <p>Приветствую, Дмитрий</p>
+        {% endblock %}
+    </main>
+</body>
+</html>
