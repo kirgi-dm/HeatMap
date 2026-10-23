@@ -2,19 +2,20 @@
 
 {% macro user_actions(user) %}
 <div class="mt-2">
-    <a class="btn btn-sm btn-outline-primary" href="{{ request.url_for('get_user').include_query_params(username=user.username, edit='true') }}">Редактировать</a>
-    <form method="post" action="{{ request.url_for('remove_user').include_query_params(username=user.username) }}" class="d-inline">
+    <a class="btn btn-sm btn-outline-primary" href="{{ request.url_for('get_user', user_id=user.id).include_query_params(edit='true') }}">Редактировать</a>
+    <form method="post" action="{{ request.url_for('remove_user', user_id=user.id) }}" class="d-inline">
         <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
     </form>
 </div>
 {% endmacro %}
 
 {% block content %}
-{% if editing %}<h2>Редактирование пользователя</h2>{% endif %}
-<form method="post" action="{{ request.url_for('save_user').include_query_params(username=user.username) if editing else url_for('create_user') }}" class="mb-4">
+<h2>{{ 'Редактирование пользователя #' ~ user.id if editing else 'Добавить пользователя' }}</h2>
+{% if editing %}<p>ID: <strong>{{ user.id }}</strong> (назначается автоматически)</p>{% endif %}
+<form method="post" action="{{ request.url_for('save_user', user_id=user.id) if editing else url_for('create_user') }}" class="mb-4">
     <div class="form-group">
         <label for="username">Имя пользователя</label>
-        <input type="text" name="username" id="username" value="{{ user.username if editing else '' }}" class="form-control" required>
+        <input type="text" name="username" id="username" value="{{ user.username if editing else '' }}" maxlength="100" class="form-control" required>
     </div>
     <div class="form-group">
         <label for="email">Email</label>
@@ -26,7 +27,7 @@
 
 {% if user and not editing %}
 <article class="card card-body">
-    <h2>{{ user.username }}</h2>
+    <h2>Пользователь #{{ user.id }}: {{ user.username }}</h2>
     <p>Email: {{ user.email }}</p>
     {{ user_actions(user) }}
 </article>
@@ -35,10 +36,12 @@
 <ul class="list-group">
     {% for user in users %}
     <li class="list-group-item">
-        {{ loop.index }}.
-        <a href="{{ request.url_for('get_user').include_query_params(username=user.username) }}">{{ user.username }}</a>
+        <strong>ID: {{ user.id }}</strong> ·
+        <a href="{{ request.url_for('get_user', user_id=user.id) }}">{{ user.username }}</a>
         {{ user_actions(user) }}
     </li>
+    {% else %}
+    <li class="list-group-item">Пользователей пока нет.</li>
     {% endfor %}
 </ul>
 {% endif %}

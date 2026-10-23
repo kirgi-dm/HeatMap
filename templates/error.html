@@ -1,0 +1,9 @@
+{% extends "home.html" %}
+{% block content %}
+<div class="alert alert-danger" role="alert">
+    <h2>Ошибка {{ status_code }}</h2>
+    <p>{{ message }}</p>
+</div>
+<a class="btn btn-outline-primary" href="{{ url_for('get_users') }}">Пользователи</a>
+<a class="btn btn-outline-primary" href="{{ url_for('get_orders') }}">Заказы</a>
+{% endblock %}

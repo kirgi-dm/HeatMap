@@ -2,37 +2,44 @@
 
 {% macro order_actions(order) %}
 <div class="mt-2">
-    <a class="btn btn-sm btn-outline-primary" href="{{ request.url_for('get_orders').include_query_params(name=order.name, edit='true') }}">Редактировать</a>
-    <form method="post" action="{{ request.url_for('remove_order').include_query_params(name=order.name) }}" class="d-inline">
+    <a class="btn btn-sm btn-outline-primary" href="{{ request.url_for('get_order', order_id=order.id).include_query_params(edit='true') }}">Редактировать</a>
+    <form method="post" action="{{ request.url_for('remove_order', order_id=order.id) }}" class="d-inline">
         <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
     </form>
 </div>
 {% endmacro %}
 
 {% block content %}
-{% if editing %}<h2>Редактирование заказа</h2>{% endif %}
-<form method="post" action="{{ request.url_for('save_order').include_query_params(name=order.name) if editing else url_for('create_order') }}" class="mb-4">
+<h2>{{ 'Редактирование заказа #' ~ order.id if editing else 'Добавить заказ' }}</h2>
+{% if editing %}<p>ID: <strong>{{ order.id }}</strong> (назначается автоматически)</p>{% endif %}
+{% if users %}
+<form method="post" action="{{ request.url_for('save_order', order_id=order.id) if editing else url_for('create_order') }}" class="mb-4">
     <div class="form-group">
         <label for="name">Название заказа</label>
-        <input type="text" name="name" id="name" value="{{ order.name if editing else '' }}" class="form-control" required>
+        <input type="text" name="name" id="name" value="{{ order.name if editing else '' }}" maxlength="200" class="form-control" required>
     </div>
     <div class="form-group">
-        <label for="username">Имя пользователя</label>
-        <input type="text" name="username" id="username" value="{{ order.user.username if editing else '' }}" class="form-control" required>
-    </div>
-    <div class="form-group">
-        <label for="email">Email пользователя</label>
-        <input type="email" name="email" id="email" value="{{ order.user.email if editing else '' }}" class="form-control" required>
+        <label for="user_id">Пользователь</label>
+        <select name="user_id" id="user_id" class="form-control" required>
+            <option value="" disabled {{ '' if editing else 'selected' }}>Выберите пользователя</option>
+            {% for user in users %}
+            <option value="{{ user.id }}" {% if editing and order.user_id == user.id %}selected{% endif %}>#{{ user.id }} · {{ user.username }} ({{ user.email }})</option>
+            {% endfor %}
+        </select>
     </div>
     <button type="submit" class="btn btn-outline-primary">{{ 'Сохранить' if editing else 'Добавить заказ' }}</button>
     {% if editing %}<a href="{{ url_for('get_orders') }}" class="btn btn-outline-secondary">Отмена</a>{% endif %}
 </form>
+{% else %}
+<p class="alert alert-info">Для создания заказа <a href="{{ url_for('get_users') }}">сначала добавьте пользователя</a>.</p>
+{% endif %}
 
 {% if order and not editing %}
+{% set owner = users_by_id[order.user_id] %}
 <article class="card card-body">
-    <h2>{{ order.name }}</h2>
-    <p>Пользователь: {{ order.user.username }}</p>
-    <p>Email: {{ order.user.email }}</p>
+    <h2>Заказ #{{ order.id }}: {{ order.name }}</h2>
+    <p>Пользователь: <a href="{{ request.url_for('get_user', user_id=owner.id) }}">#{{ owner.id }} · {{ owner.username }}</a></p>
+    <p>Email: {{ owner.email }}</p>
     {{ order_actions(order) }}
 </article>
 {% elif not order %}
@@ -40,10 +47,13 @@
 <ul class="list-group">
     {% for order in orders %}
     <li class="list-group-item">
-        {{ loop.index }}.
-        <a href="{{ request.url_for('get_orders').include_query_params(name=order.name) }}">{{ order.name }}</a>
+        <strong>ID: {{ order.id }}</strong> ·
+        <a href="{{ request.url_for('get_order', order_id=order.id) }}">{{ order.name }}</a>
+        <span class="text-muted">(пользователь #{{ order.user_id }})</span>
         {{ order_actions(order) }}
     </li>
+    {% else %}
+    <li class="list-group-item">Заказов пока нет.</li>
     {% endfor %}
 </ul>
 {% endif %}
