@@ -1,6 +1,7 @@
 from fastapi import Form
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from sqlmodel import Field as SQLField, SQLModel
 
 
 class OrderCreate(BaseModel):
@@ -26,3 +27,12 @@ class OrderCreate(BaseModel):
 
 class Order(OrderCreate):
     id: int = Field(gt=0, examples=[1])
+
+
+class OrderTable(SQLModel, table=True):
+    __tablename__ = "orders"
+    __table_args__ = {"sqlite_autoincrement": True}
+
+    id: int | None = SQLField(default=None, primary_key=True)
+    name: str = SQLField(max_length=200)
+    user_id: int = SQLField(foreign_key="users.id", index=True, ondelete="RESTRICT")

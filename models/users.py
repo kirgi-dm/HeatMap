@@ -1,6 +1,7 @@
 from fastapi import Form
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, ValidationError
+from sqlmodel import Field as SQLField, SQLModel
 
 
 class UserCreate(BaseModel):
@@ -28,3 +29,12 @@ class UserCreate(BaseModel):
 
 class User(UserCreate):
     id: int = Field(gt=0, examples=[1])
+
+
+class UserTable(SQLModel, table=True):
+    __tablename__ = "users"
+    __table_args__ = {"sqlite_autoincrement": True}
+
+    id: int | None = SQLField(default=None, primary_key=True)
+    username: str = SQLField(max_length=100)
+    email: str
