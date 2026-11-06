@@ -1,13 +1,26 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from database.connection import StorageError
+from database.connection import Settings, StorageError
 from dependencies import templates
 from routes.orders import order_router
 from routes.pages import page_router
 from routes.users import user_router
 
-app = FastAPI(title="HeatMap", description="Управление пользователями и заказами")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    client = await Settings().initialize_database()
+    try:
+        yield
+    finally:
+        await client.close()
+
+
+app = FastAPI(
+    title="HeatMap", description="Управление пользователями и заказами", lifespan=lifespan
+)
 
 
 @app.exception_handler(StorageError)

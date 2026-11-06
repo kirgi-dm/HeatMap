@@ -1,3 +1,4 @@
+from beanie import Document
 from fastapi import Form
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, ValidationError
@@ -26,5 +27,13 @@ class UserCreate(BaseModel):
             raise RequestValidationError(error.errors()) from error
 
 
-class User(UserCreate):
-    id: int = Field(gt=0, examples=[1])
+class UserUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    username: str | None = Field(default=None, min_length=1, max_length=100)
+    email: EmailStr | None = None
+
+
+class User(Document, UserCreate):
+    class Settings:
+        name = "users"

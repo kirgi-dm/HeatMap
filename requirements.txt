@@ -2,3 +2,6 @@ fastapi[standard]
 pydantic[email]
 jinja2
 python-multipart
+beanie>=2,<3
+pymongo>=4.13,<5
+pydantic-settings>=2,<3
